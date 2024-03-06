@@ -7,17 +7,20 @@
 
 const { Sequelize, DataTypes} = require('sequelize')
 // sequelize instant olusturma
-// const sequelize = new Sequelize('sqlite:./db.sqlite3')
+const sequelize = new Sequelize('sqlite:./db.sqlite3')
+// POSTGRESQL CONNECTION:
+// $ npm i pg pg-hstore
+// const sequelize = new Sequelize('postgres://user:pass@example.com:5432/dbname')
+// const sequelize = new Sequelize('postgres://userCH15:12345678@localhost:5432/testCH15')
 
+// MYSQL CONNECTION:
+// $ npm i mysql2 
+// $ npm i mariadb // Alternative
+// const sequelize = new Sequelize('mysql://user:pass@localhost:5432/dbname')
 
-// POSTGRESQL CONNECTION 
-// npm i pg pg-hstore 
-
-const sequelize = new Sequelize('postgres://userCH15:12345678@localhost:5432/testCH15')
-
-// definemethodu sequelize modeli oluşturur:
+// define methodu sequelize modeli oluşturur:
 // her bir model, veritabanında bir tabloya denk gelir.
-// sequelize.define('tableName', { modelDetails })
+// sequelize.define('tableName', {  modelDetails  })
 
 const Todo = sequelize.define('todos', {
     //* ilk sütun olarak id sutunu sequelize tarafından otomatik oluşturulur/yönetilir.
