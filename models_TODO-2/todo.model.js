@@ -4,11 +4,16 @@
 ------------------------------------------------------- */
 
 // MODELS
+
 const { Sequelize, DataTypes} = require('sequelize')
-
 // sequelize instant olusturma
+// const sequelize = new Sequelize('sqlite:./db.sqlite3')
 
-const sequelize = new Sequelize('sqlite:./db.sqlite3')
+
+// POSTGRESQL CONNECTION 
+// npm i pg pg-hstore 
+
+const sequelize = new Sequelize('postgres://userCH15:12345678@localhost:5432/testCH15')
 
 // definemethodu sequelize modeli oluşturur:
 // her bir model, veritabanında bir tabloya denk gelir.
@@ -35,7 +40,8 @@ const Todo = sequelize.define('todos', {
     },
     description: DataTypes.TEXT, // SHORTHAND USING
     priority:{ //-1: low, 0:normal 1:high
-        type:DataTypes.TINYINT,
+        // type:DataTypes.TINYINT, //postgresql desteklemiyor
+        type:DataTypes.INTEGER,
         allowNull:false,
         defaultValue: 0,
     }, // shorthand using
