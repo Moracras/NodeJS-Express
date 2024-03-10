@@ -33,13 +33,14 @@ module.exports.BlogPost={
     },
     read: async(req,res)=>{
         const data = await BlogPost.find({_id:req.params.postId})
+        
         res.status(202).send({
             error:false,
             data:data 
         })
     },
     update: async(req,res)=>{
-        const data = await BlogPost.updateOne({_id:req.params.postId},req.body)
+        const data = await BlogPost.updateOne(req.body,{_id:req.params.postId})
         const newdata = await BlogPost.find({_id:req.params.postId})
         res.status(202).send({
             error:false,

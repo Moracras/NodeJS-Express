@@ -11,7 +11,7 @@ router.route('/posts')
 .get(BlogPost.list)
 .post(BlogPost.create)
 
-router.route('posts/:postId')
+router.route('/posts/:postId')
 .get(BlogPost.read)
 .put(BlogPost.update) // put patch aynı
 .patch(BlogPost.update)
