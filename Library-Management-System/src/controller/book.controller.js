@@ -2,12 +2,12 @@
 
 require("express-async-error")
 
-const {Book} = require('../models/book')
+const {Book} = require('../models/book.model')
 
 
-module.exports.Book={
+module.exports={
     list: async(req,res) =>{
-        const data = await Book.find()
+        const data = await Book.findAll()
         res.status(200).send({
             error:false,
             data

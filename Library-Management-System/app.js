@@ -12,7 +12,7 @@ require('express-async-error')
 
 
 
-app.use(require('./src/models/book'))
+app.use(require('./src/routes/book.router'))
 
 
 
