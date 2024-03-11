@@ -7,10 +7,36 @@
 const mongoose = require("mongoose")
 
 
-const blogPostSchema = new mongoose.Schema(
-    {
+// BLOG CATEGORY:
+
+const blogCategorySchema = new mongoose.Schema({
+
+    name: {
+        type:String,
+        trim:true,
+        required:true
+    }
+
+
+}/*şema şekil*/, {
+
+    collection:"blogCategory",
+    timestamps: true
+
+}/*şema ayarları*/)
+
+
+
+// BLOG POST
+const blogPostSchema = new mongoose.Schema({
         //_id
         // categoryId
+        blogCategoryId:{
+            type: mongoose.Schema.Types.ObjectId, // Foreign key, RelationalID
+            ref:'BlogCategory', //referans tanımlamak şart
+            required:true
+        },
+
         title:{
             type:String,
             trim:true,
@@ -21,19 +47,23 @@ const blogPostSchema = new mongoose.Schema(
             trim:true,
             required:true
 
+        },
+        published:{
+            type:Boolean,
+            default:true
         }
     },
     {
         collection:"blogPost",
         timestamps: true
-    }
-)
+    })
 // const BlogPostModel= mongoose.model('BlogPost',blogPostSchema)
 // module.exports={
 //     BlogPost:BlogPostModel,
 
 
 module.exports = {
+    BlogCategory: mongoose.model('BlogCategory',blogCategorySchema),
     BlogPost: mongoose.model('BlogPost',blogPostSchema)
 }
 
