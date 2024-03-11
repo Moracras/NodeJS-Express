@@ -7,7 +7,7 @@ const {Book} = require('../models/book.model')
 
 module.exports={
     list: async(req,res) =>{
-        const data = await Book.findAll()
+        const data = await Book.findAndCountAll()
         res.status(200).send({
             error:false,
             data
