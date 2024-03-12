@@ -1,5 +1,6 @@
 "use strict"
 
+const { CustomError } = require("../errors/customError")
 const { Todo } = require("../models/todo.model")
 const mongoose = require("mongoose")
 
@@ -17,6 +18,7 @@ const todo = {
     },
     read: async(req,res) =>{
         const idIsValid = mongoose.Types.ObjectId.isValid(req.params.id)
+        if(!idIsValid) throw new CustomError("id is not vlaid", 400)
         const data = await Todo.findOne({ _id: req.params.id})
         res.status.send({})
     },
