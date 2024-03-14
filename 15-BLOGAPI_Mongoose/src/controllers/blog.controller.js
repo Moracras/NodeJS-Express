@@ -18,9 +18,11 @@ const { BlogCategory, BlogPost } = require("../models/blog.model")
 module.exports.BlogCategory = {
 
     list: async (req, res) => {
-        const data = await BlogCategory.find()
+        // const data = await BlogCategory.find()
+        const data = await res.getModelList(BlogCategory)
         res.status(200).send({
             error: false,
+            details: await res.getModelListDetails(BlogCategory),
             data: data
         })
     },
@@ -33,7 +35,7 @@ module.exports.BlogCategory = {
         })
     },
     read: async (req, res) => {
-        const data = await BlogCategory.find({ _id: req.params.categoryId })
+        const data = await BlogCategory.findOne({ _id: req.params.categoryId })
         res.status(202).send({
             error: false,
             data: data
@@ -41,7 +43,7 @@ module.exports.BlogCategory = {
     },
     update: async (req, res) => {
         const data = await BlogCategory.updateOne({ _id: req.params.categoryId }, req.body)
-        const newdata = await BlogCategory.find({ _id: req.params.categoryId })
+        const newdata = await BlogCategory.findOne({ _id: req.params.categoryId })
         res.status(202).send({
             error: false,
             body: req.body,
@@ -60,33 +62,66 @@ module.exports.BlogCategory = {
 module.exports.BlogPost = {
 
     list: async (req, res) => {
-        /* FILTERING & SEARCHING & SORTING & PAGINATION */
+
+        /* FILTERING & SEARCHING & SORTING & PAGINATION *
 
         // FILTERING:
         // URL?filter[key1]=value1&filter[key2]=value2
         const filter = req.query?.filter || {}
-        // console.log(filter);
+        // console.log(filter)
 
         // SEARCHING:
         // URL?search[key1]=value1&search[key2]=value2
         // https://www.mongodb.com/docs/manual/reference/operator/query/regex/
         const search = req.query?.search || {}
-        console.log(search); 
-        // { title: 'test 0', content: 'test' } => { title: {$regex:'test'}, content: {$regex:'test'} }
-        for (let key in search){
-            search[key] = {$regex:search[key]}
+        // console.log(search)
+        //? { title: 'test', content: 'test' } -> { title: { $regex: 'test' }, content: { $regex: 'test' } }
+        for (let key in search) {
+            // search['title'] = { $regex: search['title'] }
+            // search['content'] = { $regex: search['content'] }
+            search[key] = { $regex: search[key], $options: 'i' } // i: insensitive
         }
-        console.log(search);
+        // console.log(search)
 
+        // SORTING:
+        // URL?sort[key1]=asc&sort[key2]=desc
+        // 1: A-Z - -1: Z-A // deprecated
+        // asc: A-Z - desc: Z-A
+        const sort = req.query?.sort || {}
+        // console.log(sort)
+
+        // PAGINATION:
+        // URL?page=3&limit=10
+
+        // Limit:
+        let limit = Number(req.query?.limit)
+        limit = limit > 0 ? limit : Number(process.env.PAGE_SIZE || 20)
+        console.log('limit', limit)
+
+        // Page:
+        let page = Number(req.query?.page)
+        // page = page > 0 ? page : 1
+        page = page > 0 ? (page - 1) : 0 // Backend 'de sayfa sayısı her zmaan page-1 olarak hesaplanmalı.
+        console.log('page', page)
+
+        // Skip:
+        // LIMIT 20, 10
+        let skip = Number(req.query?.skip)
+        skip = skip > 0 ? skip : (page * limit)
+        console.log('skip', skip)
 
         /* FILTERING & SEARCHING & SORTING & PAGINATION */
 
-        // const data = await BlogPost.find({published: true})
+        // const data = await BlogPost.find({ published: true })
         // const data = await BlogPost.find(filter)
-        const data = await BlogPost.find({...filter,...search}) // hem search hem filter parametresi find tarafından calıstırılaiblir oldu
+        // const data = await BlogPost.find({ ...filter, ...search }).sort(sort).skip(skip).limit(limit)
+        
+        // const data = await BlogPost.find().populate('blogCategoryId')
+        const data = await res.getModelList(BlogPost, 'blogCategoryId')
 
         res.status(200).send({
             error: false,
+            details: await res.getModelListDetails(BlogPost),
             data: data
         })
 
@@ -100,7 +135,7 @@ module.exports.BlogPost = {
         })
     },
     read: async (req, res) => {
-        const data = await BlogPost.find({ _id: req.params.postId })
+        const data = await BlogPost.findOne({ _id: req.params.postId }).populate('blogCategoryId')
         res.status(202).send({
             error: false,
             data: data
@@ -109,7 +144,7 @@ module.exports.BlogPost = {
     },
     update: async (req, res) => {
         const data = await BlogPost.updateOne({ _id: req.params.postId }, req.body)
-        const newdata = await BlogPost.find({ _id: req.params.postId })
+        const newdata = await BlogPost.findOne({ _id: req.params.postId })
         res.status(202).send({
             error: false,
             body: req.body,
