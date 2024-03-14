@@ -29,33 +29,23 @@ require('./src/configs/dbConnection') // dotenv çalıştıktan sonra
 //* $ npm i cookie-session
 
 const session = require('cookie-session')
-app.use(session({
-    secret: process.env.SECRET_KEY, // Şifreleme anahtarı
-    // maxAge: 1000 * 60 * 60 * 24 * 3  // miliseconds // 3 days
-}))
-/* ------------------------------------------------------- */
 
-// Check logined User:
-app.use(require('./src/middlewares/userControl'))
+app.use(session({
+    secret:process.env.SECRET_KEY, // şifreleme anahtarı
+    // maxAge: 1000 * 60 * 60 * 24 * 3 // miliseconds // 3 days
+
+}))
+
+
 
 /* ------------------------------------------------------- */
 
 app.all('/', (req, res) => {
-    // res.send('WELCOME BLOG API PROJECT')
-    if (req.isLogin) {
-        res.send({
-            error: false,
-            message: 'WELCOME BLOG API PROJECT',
-            session: req.session,
-            user: req.user
-        })
-    } else {
-        res.send({
-            error: false,
-            message: 'WELCOME BLOG API PROJECT',
-            session: req.session,
-        })
-    }
+    res.send({
+        error:false,
+        message:'WELCOME BLOG API PROJECT',
+        loginedUser: req.session
+    })
 })
 
 app.use('/user', require("./src/routes/user.router"))

@@ -6,6 +6,7 @@
 require("express-async-errors")
 
 const User = require("../models/user.model")
+
 const passwordEncrypt = require('../helpers/passwordEncrypt')
 
 module.exports = {
@@ -49,61 +50,32 @@ module.exports = {
         res.sendStatus((data.deletedCount >= 1) ? 204 : 404)
     },
 
-    // Login/Logout:
-    login: async (req, res) => {
+    // login/Logout:
+    login: async (req, res) =>{
+        const {email, password}= req.body
 
-        const { email, password } = req.body
+        if(email && password){
 
-        if (email && password) {
-            
-            // const user = await User.findOne({ email: email })
-            const user = await User.findOne({ email })
+            // const user = await User.findOne({email: email})
+            const user = await User.findOne({email})
+            if (user && user.password == passwordEncrypt(password)){
 
-            if (user && user.password == passwordEncrypt(password)) {
-
-                /* SESSION */
-                // req.session = {
-                //     email: user.email,
-                //     password: user.password
-                // }
-                // req.session.email = user.email
-                req.session.id = user.id
-                req.session.password = user.password
-                /* SESSION */
-
-                /* COOKIE */
-                if (req.body?.remindMe) {
-                    req.session.remindMe = req.body.remindMe
-                    // SET maxAge:
-                    req.sessionOptions.maxAge = 1000 * 60 * 60 * 24 * 3 // 3 days
+                //req.session = {
+                    email:user.email,
+                    
                 }
-                /* COOKIE */
 
-                res.status(200).send({
-                    error: false,
-                    message: 'Login OK',
-                    user
-                })
-
-            } else {
+            }else{
                 res.errorStatusCode = 401
                 throw new Error('Login parameters are not true.')
             }
-        } else {
+
+        }else{
             res.errorStatusCode = 401
-            throw new Error('Email and password are required.')
+            throw new Error('Email and password are required')
         }
+    },
+    logout: async (req, res) =>{
 
     },
-    logout: async (req, res) => {
-
-        // Session destroy:
-        req.session = null
-
-        res.status(200).send({
-            error: false,
-            message: 'Logout OK'
-        })
-
-    }
 }
