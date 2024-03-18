@@ -32,8 +32,25 @@ require("express-async-errors")
 const { dbConnection } = require('./src/configs/dbConnection')
 dbConnection()
 
+/* ------------------------------------------------------- */
+//Middlewares:
+// Accept JSON:
+app.use(express.json())
+
+//SessionsCookies:
+app.use(require('cookie-session'))
+
+// res.getModelList():
+app.use(require("./src/middlewares/findSearchSortPage"))
 
 /* ------------------------------------------------------- */
+// Routes:
+app.all('/', (req, res) => {
+    res.send({
+        error: false,
+        message: 'Welcome to PERSONNEL API',
+    })
+})
 
 // errorHandler:
 app.use(require('./src/middlewares/errorHandler'))
