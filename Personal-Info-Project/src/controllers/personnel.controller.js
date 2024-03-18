@@ -18,6 +18,19 @@ module.exports = {
   },
 
   create: async (req, res) => {
+    // isLead Control:
+    const isLead = req.body.isLead || false;
+
+    if (isLead) {
+      await Personnel.updateMany(
+        {
+          departmentId: req.body.departmentId,
+          isLead: true,
+        },
+        { isLead: false }
+      );
+    }
+
     const data = await Personnel.create(req.body);
 
     res.status(201).send({
@@ -36,6 +49,19 @@ module.exports = {
   },
 
   update: async (req, res) => {
+    // isLead Control:
+    const isLead = req.body?.isLead || false;
+    if (isLead) {
+      const { departmentId } = await Personnel.findOne(
+        { _id: req.params.id },
+        { departmentId: 1 }
+      );
+      await Personnel.updateMany(
+        { departmentId, isLead: true },
+        { isLead: false }
+      );
+    }
+
     const data = await Personnel.updateOne({ _id: req.params.id }, req.body, {
       runValidators: true,
     });
