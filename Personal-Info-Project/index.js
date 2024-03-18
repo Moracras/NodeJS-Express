@@ -42,6 +42,7 @@ app.use(require('cookie-session'))
 
 // res.getModelList():
 app.use(require("./src/middlewares/findSearchSortPage"))
+app.use("/personnels", require("./src/routes/personnel.router"));
 
 /* ------------------------------------------------------- */
 // Routes:
