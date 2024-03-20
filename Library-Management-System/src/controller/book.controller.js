@@ -2,7 +2,7 @@
 
 require("express-async-error")
 
-const {Book} = require('../models/book.model')
+const {Book} = require("../models/book.model")
 
 
 module.exports={
