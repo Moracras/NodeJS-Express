@@ -65,19 +65,39 @@ module.exports = {
         }
     },
 
+    
+
     logout: async (req, res) => {
-        /* SESSION *
+        /* SESSION */
         // Set session to null:
         req.session = null
         /* SESSION */
 
         /* TOKEN */
 
+        //* 1. Yöntem (Kısa yöntem)
+        //? Her kullanıcı için sadece 1 adet token var ise (tüm cihazlardan çıkış yap):
+
+        // console.log(req.user)
+        // await Token.deleteOne({ userId: req.user._id })
+
+        //* 2. Yöntem:
+        //? Her kullanıcı için 1'den fazla token var ise (çoklu cihaz):
+
+        const auth = req.headers?.authorization || null // Token ...tokenKey...
+        const tokenKey = auth ? auth.split(' ') : null // ['Token', '...tokenKey...']
+        let deleted = null;
+        if (tokenKey && tokenKey[0]=='Token') {
+           deleted= await Token.deleteOne({ token: tokenKey[1] })
+        }
+
         /* TOKEN */
 
         res.status(200).send({
             error: false,
-            message: 'Logout: Sessions Deleted.'
+            // message: 'Logout: Sessions Deleted.',
+            message: 'Logout: Token Deleted.',
+            deleted
         })
     },
 }
