@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /* -------------------------------------------------------
     EXPRESS - Personnel API
 ------------------------------------------------------- */
@@ -8,25 +8,25 @@
     $ npm i jsonwebtoken
 */
 
-const express = require('express')
-const app = express()
+const express = require("express");
+const app = express();
 
 /* ------------------------------------------------------- */
 // Required Modules:
 
 // envVariables to process.env:
-require('dotenv').config()
-const PORT = process.env?.PORT || 8000
+require("dotenv").config();
+const PORT = process.env?.PORT || 8000;
 
 // asyncErrors to errorHandler:
-require('express-async-errors')
+require("express-async-errors");
 
 /* ------------------------------------------------------- */
 // Configrations:
 
 // Connect to DB:
-const { dbConnection } = require('./src/configs/dbConnection')
-dbConnection()
+const { dbConnection } = require("./src/configs/dbConnection");
+dbConnection();
 
 /* ------------------------------------------------------- */
 //* MORGAN LOGGING
@@ -35,68 +35,75 @@ dbConnection()
 
 //? $ npm i morgan
 
+const morgan = require("morgan");
 
-const morgan = require('morgan')
-
-app.use(morgan())
+// app.use(morgan('combined'))
+// app.use(morgan('common'))
+// app.use(morgan('dev'))    en fazla detaydan en az detaya dogru
+// app.use(morgan('short'))
+// app.use(morgan('tiny'))
+// app.use(morgan('IP=:remote-addr | TIME=:date[clf] | METHOD=:method | URL=:url | STATUS=:status | LENGTH=:res[content-length] | REF=:referrer |  AGENT=:user-agent'))
+//? Write to log file:
+const fs = require("node:fs");
+app.use(
+  morgan("combined", {
+    strea: fs.createWriteStream("./access.log",{flags:'a+'}),
+  })
+);
 
 /* ------------------------------------------------------- */
-
 
 /* ------------------------------------------------------- */
 // Middlewares:
 
 // Accept JSON:
-app.use(express.json())
+app.use(express.json());
 
 // SessionsCookies:
-app.use(require('cookie-session')({ secret: process.env.SECRET_KEY }))
+app.use(require("cookie-session")({ secret: process.env.SECRET_KEY }));
 
 // res.getModelList():
-app.use(require('./src/middlewares/findSearchSortPage'))
+app.use(require("./src/middlewares/findSearchSortPage"));
 
 // Login/Logout Control Middleware
 app.use(async (req, res, next) => {
+  const Personnel = require("./src/models/personnel.model");
 
-    const Personnel = require('./src/models/personnel.model')
+  req.isLogin = false;
 
-    req.isLogin = false
+  if (req.session?.id) {
+    const user = await Personnel.findOne({ _id: req.session.id });
 
-    if (req.session?.id) {
+    // if (user && user.password == req.session.password) {
+    //     req.isLogin = true
+    // }
+    req.isLogin = user && user.password == req.session.password;
+  }
+  console.log("isLogin: ", req.isLogin);
 
-        const user = await Personnel.findOne({ _id: req.session.id })
-
-        // if (user && user.password == req.session.password) {
-        //     req.isLogin = true
-        // }
-        req.isLogin = user && user.password == req.session.password
-    }
-    console.log('isLogin: ', req.isLogin)
-
-    next()
-})
+  next();
+});
 
 /* ------------------------------------------------------- */
 // Authentication (Simple Token):
 
-app.use(require('./src/middlewares/authentication'))
+app.use(require("./src/middlewares/authentication"));
 
 /* ------------------------------------------------------- */
 // Routes:
 
 /* ------------------------------------------------------- */
 
-
 // HomePath:
-app.all('/', (req, res) => {
-    res.send({
-        error: false,
-        message: 'Welcome to PERSONNEL API',
-        // session: req.session,
-        // isLogin: req.isLogin
-        user: req.user
-    })
-})
+app.all("/", (req, res) => {
+  res.send({
+    error: false,
+    message: "Welcome to PERSONNEL API",
+    // session: req.session,
+    // isLogin: req.isLogin
+    user: req.user,
+  });
+});
 
 // // /departments
 // app.use('/departments', require('./src/routes/department.router'))
@@ -104,15 +111,15 @@ app.all('/', (req, res) => {
 // app.use('/personnels', require('./src/routes/personnel.router'))
 
 // app.use(require('./src/routes/index'))
-app.use(require('./src/routes/'))
+app.use(require("./src/routes/"));
 
 /* ------------------------------------------------------- */
 
 // errorHandler:
-app.use(require('./src/middlewares/errorHandler'))
+app.use(require("./src/middlewares/errorHandler"));
 
 // RUN SERVER:
-app.listen(PORT, () => console.log('http://127.0.0.1:' + PORT))
+app.listen(PORT, () => console.log("http://127.0.0.1:" + PORT));
 
 /* ------------------------------------------------------- */
 // Syncronization (must be in commentLine):
