@@ -10,7 +10,7 @@
     $ mkdir logs
     $ npm i jsonwebtoken
     $ nodemon
-    $npm i nodemailer multer /// email ve dosya
+    $npm i nodemailer multer /// email ve dosya yükleme
 */
 const express = require('express')
 const app = express()
@@ -43,6 +43,11 @@ app.use(require('./src/middlewares/logger'))
 
 // Auhentication:
 app.use(require('./src/middlewares/authentication'))
+
+/* ------------------------------------------------------- */
+
+
+/* ------------------------------------------------------- */
 
 // findSearchSortPage / res.getModelList:
 app.use(require('./src/middlewares/queryHandler'))
