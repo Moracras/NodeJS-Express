@@ -4,18 +4,37 @@
 ------------------------------------------------------- */
 
 const Token = require('../models/token')
+const jwt = require('jsonwebtoken')
 
-module.exports = async (req,res,next )=>{
-    const auth = req.header?.authorizationm // Token ...tokenKey...
-    const tokenKey =auth? auth.split(' '): null // ['Token', '...tokenKey...']
+module.exports = async (req, res, next) => {
 
-    if (tokenKey){
+    const auth = req.headers?.authorization // Token ...tokenKey...
+    const tokenKey = auth ? auth.split(' ') : null // ['Token', '...tokenKey...']
 
+    if (tokenKey) {
 
-        if(tokenKey[0] =='Token'){
-            const tokenData = await Token.findOne({ token: tokenKey[1]}).populate('userId')
+        if (tokenKey[0] == 'Token') {
+        // SimpleToken
 
-            req.user = tokenData ? tokenData.userId : undefined // false ' '
+            const tokenData = await Token.findOne({ token: tokenKey[1] }).populate('userId')
+            req.user = tokenData ? tokenData.userId : false
+
+        } else if (tokenKey[0] == 'Bearer') {
+        // JWT AccessToken:
+
+            // jwt.verify(accessToken, access_key, callbackFunction())
+            jwt.verify(tokenKey[1], process.env.ACCESS_KEY, function(error, accessData) {
+
+                // if (accessData) {
+                //     console.log('JWT Verify: YES')
+                //     req.user = accessData
+                // } else {
+                //     console.log('JWT Verify: NO')
+                //     console.log(error)
+                //     req.user = false
+                // }
+                req.user = accessData ? accessData : false
+            })
         }
     }
     next()

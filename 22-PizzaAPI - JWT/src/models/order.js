@@ -41,7 +41,6 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         default: function(){ return this.quantity * this.price }, // Create
         transform: function(){ return this.quantity * this.price }, // Update
-        // set: function(){ return this.quantity * this.price }, // All Conditions
     }
 
 }, {
