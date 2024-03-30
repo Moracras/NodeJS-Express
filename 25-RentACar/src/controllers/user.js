@@ -6,8 +6,6 @@
 
 const User = require('../models/user')
 
-const sendMail = require('../helpers/sendMail')
-
 module.exports = {
 
     list: async (req, res) => {
@@ -15,9 +13,8 @@ module.exports = {
             #swagger.tags = ["Users"]
             #swagger.summary = "List Users"
             #swagger.description = `
-                You can send query with endpoint for filter[], search[], sort[], page and limit.
+                You can send query with endpoint for search[], sort[], page and limit.
                 <ul> Examples:
-                    <li>URL/?<b>filter[field1]=value1&filter[field2]=value2</b></li>
                     <li>URL/?<b>search[field1]=value1&search[field2]=value2</b></li>
                     <li>URL/?<b>sort[field1]=1&sort[field2]=-1</b></li>
                     <li>URL/?<b>page=2&limit=1</b></li>
@@ -34,29 +31,28 @@ module.exports = {
         })
     },
 
-    // CRUD:
-
     create: async (req, res) => {
         /*
             #swagger.tags = ["Users"]
             #swagger.summary = "Create User"
+            #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: {
+                    "username": "test",
+                    "password": "1234",
+                    "email": "test@site.com",
+                    "isActive": true,
+                    "isStaff": false,
+                    "isAdmin": false,
+                }
+            }
         */
-
+        /* EĞER login olan kullanıcı admin değilse post işleminde yetkileri false  
+        req.body.isStaff=false
+        req.body.isAdmin=false
+        */
         const data = await User.create(req.body)
-
-
-        /* SenMail */
-        sendMail(
-            data.email,// to
-            'Welcome' // subject
-            // Message
-            `
-            <h1>Welcome ${data.username}</h1>
-            <p> Welcome to our system</p>
-            `
-        )
-
-        /* SenMail */
 
         res.status(201).send({
             error: false,
@@ -69,41 +65,52 @@ module.exports = {
             #swagger.tags = ["Users"]
             #swagger.summary = "Get Single User"
         */
+       
+        //? Yetkisiz kullanıcının başka bir kullanıcıyı yönetmesini engelle (sadece kendi verileri):
+        // if (!req.user.isAdmin) {
+        //     req.params.id = req.user.id
+        // }
+        // const data = await User.findOne({ _id: req.params.id })
 
-        // Manage only self-record.
-        let filter = {}
-        if (!req.user.isAdmin) {
-            // const data = await User.findOne({ _id: req.params.id, _id: req.user._id })
-            filter = { _id: req.user._id }
-        }
-
-        const data = await User.findOne({ _id: req.params.id, ...filter })
+        //? Yetkisiz kullanıcının başka bir kullanıcıyı yönetmesini engelle (sadece kendi verileri):
+        const id = req.user.isAdmin ? req.params.id : req.user.id
+        const data = await User.findOne({ _id: id })
 
         res.status(200).send({
             error: false,
             data
         })
+
     },
 
     update: async (req, res) => {
         /*
             #swagger.tags = ["Users"]
             #swagger.summary = "Update User"
+            #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: {
+                    "username": "test",
+                    "password": "1234",
+                    "email": "test@site.com",
+                    "isActive": true,
+                    "isStaff": false,
+                    "isAdmin": false,
+                }
+            }
         */
 
-        // Manage only self-record.
-        let filter = {}
-        if (!req.user.isAdmin) {
-            filter = { _id: req.user._id }
-        }
-
-        const data = await User.updateOne({ _id: req.params.id, ...filter }, req.body, { runValidators: true })
+        //? Yetkisiz kullanıcının başka bir kullanıcıyı yönetmesini engelle (sadece kendi verileri):
+        if (!req.user.isAdmin) req.params.id = req.user._id
+        const data = await User.updateOne({ _id: req.params.id }, req.body, { runValidators: true })
 
         res.status(202).send({
             error: false,
             data,
             new: await User.findOne({ _id: req.params.id })
         })
+
     },
 
     delete: async (req, res) => {
@@ -118,5 +125,6 @@ module.exports = {
             error: !data.deletedCount,
             data
         })
-    }
+
+    },
 }
