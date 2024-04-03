@@ -31,3 +31,10 @@ const { mongoose } = require('../configs/dbConnection')
 }
 /* ------------------------------------------------------- */
 // Car Model:
+
+const CarSchema = new mongoose.Schema({
+    
+},{
+    collection:'cars',
+    timestamps:true
+})
