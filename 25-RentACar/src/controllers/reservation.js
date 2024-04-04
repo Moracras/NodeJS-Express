@@ -23,11 +23,22 @@ module.exports = {
             `
         */
 
-        const data = await res.getModelList(Reservation)
+        // Başka bir kullanıcı datasını görmesini engelle:
+        let customFilter = {}
+        if (!req.user.isAdmin && !req.user.isStaff) {
+            customFilter = { userId: req.user._id }
+        }
+
+        const data = await res.getModelList(Reservation, customFilter, [
+            { path: 'userId', select: 'username firstName lastName' },
+            { path: 'carId' },
+            { path: 'createdId', select: 'username' },
+            { path: 'updatedId', select: 'username' },
+        ])
 
         res.status(200).send({
             error: false,
-            details: await res.getModelListDetails(Reservation),
+            details: await res.getModelListDetails(Reservation, customFilter),
             data
         })
     },
@@ -45,6 +56,15 @@ module.exports = {
             }
         */
 
+        // "Admin/staf değilse" veya "UserId göndermişmemişse" req.user'dan al:
+        if ((!req.user.isAdmin && !req.user.isStaff) || !req.body?.userId) {
+            req.body.userId = req.user._id
+        }
+
+        // createdId ve updatedId verisini req.user'dan al:
+        req.body.createdId = req.user._id
+        req.body.updatedId = req.user._id
+
         const data = await Reservation.create(req.body)
 
         res.status(201).send({
@@ -58,6 +78,19 @@ module.exports = {
             #swagger.tags = ["Reservations"]
             #swagger.summary = "Get Single Reservation"
         */
+
+        // Başka bir kullanıcı datasını görmesini engelle:
+        let customFilter = {}
+        if (!req.user.isAdmin && !req.user.isStaff) {
+            customFilter = { userId: req.user._id }
+        }
+
+        const data = await Reservation.findOne({ _id: req.params.id, ...customFilter }).populate([
+            { path: 'userId', select: 'username firstName lastName' },
+            { path: 'carId' },
+            { path: 'createdId', select: 'username' },
+            { path: 'updatedId', select: 'username' },
+        ])
 
         res.status(200).send({
             error: false,
@@ -78,6 +111,16 @@ module.exports = {
                 }
             }
         */
+
+        // Admin değilse rezervasyona ait userId değiştirilemez:
+        if (!req.user.isAdmin) {
+            delete req.body.userId
+        }
+
+        // updatedId verisini req.user'dan al:
+        req.body.updatedId = req.user._id
+
+        const data = await Reservation.updateOne({ _id: req.params.id }, req.body, { runValidators: true })
 
         res.status(202).send({
             error: false,

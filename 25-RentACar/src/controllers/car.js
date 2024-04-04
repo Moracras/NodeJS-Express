@@ -23,11 +23,17 @@ module.exports = {
             `
         */
 
-        const data = await res.getModelList(Car)
+        // Musait olmayan araçları listeleme:
+        let customFilter = { isAvailable: true }
+
+        const data = await res.getModelList(Car, customFilter, [
+            { path: 'createdId', select: 'username' },
+            { path: 'updatedId', select: 'username' },
+        ])
 
         res.status(200).send({
             error: false,
-            details: await res.getModelListDetails(Car),
+            details: await res.getModelListDetails(Car, customFilter),
             data
         })
     },
@@ -45,6 +51,10 @@ module.exports = {
             }
         */
 
+        // createdId ve updatedId verisini req.user'dan al:
+        req.body.createdId = req.user._id
+        req.body.updatedId = req.user._id
+
         const data = await Car.create(req.body)
 
         res.status(201).send({
@@ -58,6 +68,11 @@ module.exports = {
             #swagger.tags = ["Cars"]
             #swagger.summary = "Get Single Car"
         */
+
+        const data = await Car.findOne({ _id: req.params.id }).populate([
+            { path: 'createdId', select: 'username' },
+            { path: 'updatedId', select: 'username' },
+        ])
 
         res.status(200).send({
             error: false,
@@ -78,6 +93,11 @@ module.exports = {
                 }
             }
         */
+
+        // updatedId verisini req.user'dan al:
+        req.body.updatedId = req.user._id
+
+        const data = await Car.updateOne(customFilter, req.body, { runValidators: true })
 
         res.status(202).send({
             error: false,
