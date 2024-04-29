@@ -26,6 +26,8 @@ require('express-async-errors')
 // console.log(app)
 app.set('view engine', 'ejs')
 
+// default  
+
 app.all('/', (req, res) => {
     // API:
     // res.send({
@@ -39,7 +41,8 @@ app.all('/', (req, res) => {
 /* ------------------------------------------------------- */
 // Routes:
 
-app.use(require('./app/routes/todo.router'))
+app.use('/api',require('./app/routes/todo.router'))
+app.use('/view',require('./app/routes/todo.view.router'))
 
 /* ------------------------------------------------------- */
 // ErrorHandler:
